@@ -22,8 +22,8 @@ axiosInstance.interceptors.request.use(config => {
 const eksClient = new EKSClient({
   region,
   credentials: {
-    accessKeyId: "AKIA3X4DCJJWHYF5M42F",
-    secretAccessKey: "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",
+    accessKeyId: "<KEY>",
+    secretAccessKey: "<ACCESS_KEY>",
   },
 });
 
