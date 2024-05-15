@@ -1,18 +1,28 @@
 import React, { useState } from 'react';
+import { SelectValue, SelectTrigger, SelectItem, SelectContent, Select } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const BACK_END_URL = 'http://localhost:5000'
+// const BACK_END_URL = '<link of kubernetes loadbalancer>';
 
-const ImageProcessor = (): JSX.Element => {
+type Operation = 'edge_detection' | 'color_inversion' | 'grayscale' | 'blur' | 'sharpen' | 'brightness_increase' | 'contrast_increase' | 'sharpening';
+
+export default function Component() {
   const [file, setFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string>('https://placehold.jp/1000x1000.png');
   const [downloadUrl, setDownloadUrl] = useState<string>('');
+  const [operation, setOperation] = useState<Operation>('edge_detection');
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     if (event.target.files) {
-      setFile(event.target.files[0]);
+      const selectedFile = event.target.files[0];
+      setFile(selectedFile);
+      setFilePreview(URL.createObjectURL(selectedFile));
     }
   };
 
-  const processImage = async (operation: 'edge_detection' | 'color_inversion'): Promise<void> => {
+  const processImage = async (): Promise<void> => {
     if (!file) {
       alert('Please select a file first!');
       return;
@@ -31,7 +41,7 @@ const ImageProcessor = (): JSX.Element => {
       const data = await response.json();
       if (response.ok) {
         setDownloadUrl(`${data.processed_file}`);
-        console.log(data.processed_file)
+        console.log(data.processed_file);
         alert('File processed successfully!');
       } else {
         alert(data.error || 'Failed to process the file');
@@ -50,26 +60,37 @@ const ImageProcessor = (): JSX.Element => {
   };
 
   return (
-    <div className="p-8 bg-white rounded-lg shadow-md flex flex-col items-center">
-      <h2 className="text-2xl font-bold mb-4">Image Processing</h2>
-      <div className="mb-4">
-        <label className="block mb-2">Upload an image</label>
-        <input type="file" onChange={handleFileChange} className="mb-4" />
+    <div className="flex flex-col items-center justify-center h-screen w-full dark:bg-gray-950">
+      <Select className="dark:bg-gray-800 dark:text-gray-50 mb-4" defaultValue="edge_detection" onValueChange={(value) => setOperation(value as Operation)}>
+        <SelectTrigger className="w-64 dark:bg-gray-800 dark:text-gray-50">
+          <SelectValue placeholder="Select Operation" />
+        </SelectTrigger>
+        <SelectContent className="dark:bg-gray-800 dark:text-gray-50">
+          <SelectItem className="dark:hover:bg-gray-700 dark:hover:text-gray-50" value="edge_detection">Edge Detection</SelectItem>
+          <SelectItem className="dark:hover:bg-gray-700 dark:hover:text-gray-50" value="color_inversion">Color Inversion</SelectItem>
+          <SelectItem className="dark:hover:bg-gray-700 dark:hover:text-gray-50" value="grayscale">Grayscale</SelectItem>
+          <SelectItem className="dark:hover:bg-gray-700 dark:hover:text-gray-50" value="blur">Blur</SelectItem>
+          <SelectItem className="dark:hover:bg-gray-700 dark:hover:text-gray-50" value="sharpen">Sharpen</SelectItem>
+          <SelectItem className="dark:hover:bg-gray-700 dark:hover:text-gray-50" value="brightness_increase">Brightness Increase</SelectItem>
+          <SelectItem className="dark:hover:bg-gray-700 dark:hover:text-gray-50" value="contrast_increase">Contrast Increase</SelectItem>
+          <SelectItem className="dark:hover:bg-gray-700 dark:hover:text-gray-50" value="sharpening">Sharpening</SelectItem>
+        </SelectContent>
+      </Select>
+      <div className="flex gap-4 mb-4">
+        <Button className="dark:bg-gray-800 dark:text-gray-50 dark:border-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-50" size="lg" variant="outline" onClick={() => document.getElementById('fileInput')?.click()}>
+          Upload Image
+          <Input id="fileInput" className="hidden" type="file" onChange={handleFileChange} />
+        </Button>
+        <Button className="dark:bg-gray-800 dark:text-gray-50 dark:border-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-50" size="lg" variant="outline" onClick={processImage}>
+          Process Image
+        </Button>
+        <Button className="dark:bg-gray-800 dark:text-gray-50 dark:border-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-50" size="lg" variant="outline" onClick={downloadImage}>
+          Download Image
+        </Button>
       </div>
-      <div className="flex flex-row justify-between w-full mb-4">
-        <button onClick={() => processImage('edge_detection')} className="bg-black text-white font-bold py-2 px-4 rounded w-full mr-2">
-          Edge Detection
-        </button>
-        <button onClick={() => processImage('color_inversion')} className="bg-black text-white font-bold py-2 px-4 rounded w-full ml-2">
-          Color Inversion
-        </button>
+      <div className="w-full max-w-2xl">
+        <img alt="Processed Image" className="rounded-md" height={600} src={downloadUrl || filePreview} style={{ aspectRatio: "800/600", objectFit: "cover" }} width={800} />
       </div>
-      <img className='border-8 border-red-50' src={downloadUrl == '' ? "https://placehold.co/600x400" : downloadUrl} />
-      <button onClick={downloadImage} className="bg-black text-white font-bold py-2 px-4 rounded w-full">
-        Download
-      </button>
     </div>
   );
-};
-
-export default ImageProcessor;
+}
