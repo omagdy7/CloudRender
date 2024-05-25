@@ -77,6 +77,15 @@ kubectl apply -f worker-deployment.yaml
 kubectl apply -f auto-hpa.yaml
 ```
 
+
+### 7. Start the frontend server
+```sh
+cd frontend
+npm install
+npm run dev
+```
+
+
 ## Usage
 - Upload images to be processed by sending requests to the application server.
 - The application server stores the images in Amazon S3 and sends task notifications to RabbitMQ.
